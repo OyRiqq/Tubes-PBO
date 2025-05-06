@@ -1,9 +1,15 @@
 import pygame
 import random
 
+# Inisialisasi pygame dan ukuran layar
+pygame.init()
+WIDTH, HEIGHT = 600, 800
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock()
+
 class Basket:
     def __init__(self):
-        self.image = pygame.image.load('basket.png')  # gambar keranjang
+        self.image = pygame.image.load('basket.jpg')
         self.image = pygame.transform.scale(self.image, (100, 60))
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH // 2
@@ -18,28 +24,56 @@ class Basket:
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+
 class Fruit:
     def __init__(self):
-        self.image = pygame.image.load('fruit.png')  # gambar buah
+        self.kind = random.choice(['apple', 'orange', 'fruit', 'watermelon'])
+        self.image = pygame.image.load(f'{self.kind}.jpg')
         self.image = pygame.transform.scale(self.image, (40, 40))
         self.rect = self.image.get_rect()
         self.rect.x = random.randint(0, WIDTH - self.rect.width)
         self.rect.y = -self.rect.height
-        self.speed = random.randint(3,4)
+        self.speed = random.randint(3, 4)
 
     def fall(self):
         self.rect.y += self.speed
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+
+class Bomb:
+    def __init__(self):
+        self.image = pygame.image.load('bomb.png')
+        self.image = pygame.transform.scale(self.image, (40, 40))
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randint(0, WIDTH - self.rect.width)
+        self.rect.y = -self.rect.height
+        self.speed = random.randint(4, 6)
+
+    def fall(self):
+        self.rect.y += self.speed
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
 class Game:
     def __init__(self):
         self.basket = Basket()
         self.fruits = []
+        self.bombs = []
         self.score = 0
         self.lives = 3
-        self.spawn_delay = 30  # jeda antar buah
+        self.spawn_delay = 30
         self.counter = 0
+
+    def game_over_screen(self):
+        font = pygame.font.SysFont(None, 72)
+        text = font.render("GAME OVER", True, (255, 0, 0))
+        screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
+        pygame.display.flip()
+        pygame.time.delay(2000)
+        pygame.quit()
+        exit()
 
     def run(self):
         running = True
@@ -51,9 +85,12 @@ class Game:
 
             self.basket.move(keys)
             self.counter += 1
-            if self.counter >= self.spawn_delay:
+
+            if self.counter % self.spawn_delay == 0:
                 self.fruits.append(Fruit())
-                self.counter = 0
+
+            if self.counter % 90 == 0:
+                self.bombs.append(Bomb())
 
             for fruit in self.fruits[:]:
                 fruit.fall()
@@ -64,30 +101,31 @@ class Game:
                     self.fruits.remove(fruit)
                     self.score += 1
 
-            # Game over check
+            for bomb in self.bombs[:]:
+                bomb.fall()
+                if bomb.rect.top > HEIGHT:
+                    self.bombs.remove(bomb)
+                elif bomb.rect.colliderect(self.basket.rect):
+                    self.bombs.remove(bomb)
+                    self.lives -= 1
+
             if self.lives <= 0:
                 self.game_over_screen()
 
-            screen.fill((135, 206, 235))  # biru langit
+            screen.fill((255, 255, 255))
             self.basket.draw(screen)
             for fruit in self.fruits:
                 fruit.draw(screen)
+            for bomb in self.bombs:
+                bomb.draw(screen)
 
-            # Tampilkan skor dan nyawa
             font = pygame.font.SysFont(None, 36)
             score_text = font.render(f"Score: {self.score}   Lives: {self.lives}", True, (0, 0, 0))
             screen.blit(score_text, (10, 10))
 
             pygame.display.flip()
             clock.tick(60)
-        
-if __name__ == "__main__":
-    pygame.init()
-    WIDTH, HEIGHT = 600, 800
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    clock = pygame.time.Clock()
 
+if __name__ == "__main__":
     game = Game()
     game.run()
-
-    pygame.quit()
