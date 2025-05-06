@@ -5,6 +5,7 @@ import random
 pygame.init()
 WIDTH, HEIGHT = 600, 800
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Fruit Catcher")
 clock = pygame.time.Clock()
 
 class Basket:
@@ -65,6 +66,28 @@ class Game:
         self.lives = 3
         self.spawn_delay = 30
         self.counter = 0
+
+    def show_start_screen(self):
+        screen.fill((255, 255, 255))
+        font = pygame.font.SysFont(None, 72)
+        title = font.render("Fruit Catcher", True, (0, 0, 0))
+        screen.blit(title, (WIDTH // 2 - title.get_width() // 2, HEIGHT // 2 - 100))
+        
+        font_small = pygame.font.SysFont(None, 36)
+        prompt = font_small.render("Press SPACE to Start", True, (0, 0, 0))
+        screen.blit(prompt, (WIDTH // 2 - prompt.get_width() // 2, HEIGHT // 2))
+
+        pygame.display.flip()
+
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        waiting = False
 
     def game_over_screen(self):
         font = pygame.font.SysFont(None, 72)
@@ -128,4 +151,5 @@ class Game:
 
 if __name__ == "__main__":
     game = Game()
+    game.show_start_screen()
     game.run()
