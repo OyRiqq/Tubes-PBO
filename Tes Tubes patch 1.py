@@ -27,7 +27,7 @@ class Basket:
 
 class Fruit:
     def __init__(self):
-        self.kind = random.choice(['apple', 'orange', 'fruit', 'watermelon'])
+        self.kind = random.choice(['apple', 'orange', 'watermelon'])
         self.image = pygame.image.load(f'{self.kind}.jpg')
         self.image = pygame.transform.scale(self.image, (40, 40))
         self.rect = self.image.get_rect()
